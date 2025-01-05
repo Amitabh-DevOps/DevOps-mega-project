@@ -58,7 +58,7 @@ spec:
             - ping
             - -h
             - localhost
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 10
       volumes:
       - name: mysql-pv-storage
