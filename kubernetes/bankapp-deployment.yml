@@ -48,3 +48,7 @@ spec:
             secretKeyRef:
               name: mysql-secret
               key: SPRING_DATASOURCE_PASSWORD
+        - name: SERVER_SERVLET_SESSION_TIMEOUT
+          value: "30m"
+        - name: SPRING_SESSION_STORE_TYPE
+          value: "jdbc"
