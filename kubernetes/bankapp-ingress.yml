@@ -4,6 +4,11 @@ metadata:
   name: bankapp-ingress
   namespace: bankapp-namespace
   annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"  # Force HTTPS
+    cert-manager.io/cluster-issuer: letsencrypt-prod  # Use Let's Encrypt
+    
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
