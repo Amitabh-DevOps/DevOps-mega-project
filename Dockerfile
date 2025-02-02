@@ -1,9 +1,9 @@
 #----------------------------------
-# Stage 1
+# Stage 1 - Build Application
 #----------------------------------
 
-# Import docker image with maven installed
-FROM maven:3.8.3-openjdk-17 as builder 
+# Upgrade Maven & JDK base image
+FROM maven:3.9.6-eclipse-temurin-17 as builder 
 
 # Set working directory
 WORKDIR /app
@@ -11,21 +11,32 @@ WORKDIR /app
 # Copy source code from local to container
 COPY . /app
 
-# Build application and skip test cases
-RUN mvn clean install -DskipTests=true
+# Upgrade dependencies & cache Maven repository
+RUN mvn clean install -DskipTests=true -Dmaven.repo.local=/app/.m2/repository
+
 
 #--------------------------------------
-# Stage 2
+# Stage 2 - Run Application Securely
 #--------------------------------------
 
-# Import small size java image
-FROM openjdk:17-alpine as deployer
+# Upgrade OpenJDK Alpine base image
+FROM eclipse-temurin:17-jre-alpine as deployer
 
-# Copy build from stage 1 (builder)
-COPY --from=builder /app/target/*.jar /app/target/bankapp.jar
+# Update system packages to fix vulnerabilities
+RUN apk update && apk upgrade --no-cache
 
-# Expose application port 
+# Create non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+# Set working directory
+WORKDIR /app
+
+# Copy only the built JAR file from the build stage
+COPY --from=builder /app/target/*.jar /app/bankapp.jar
+
+# Expose application port
 EXPOSE 8080
 
-# Start the application
-ENTRYPOINT ["java", "-jar", "/app/target/bankapp.jar"]
+# Start the application securely
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/bankapp.jar"]
